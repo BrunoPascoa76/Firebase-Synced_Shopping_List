@@ -54,5 +54,11 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
-    implementation(platform("com.google.firebase:firebase-bom:34.8.0"))
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.com.google.firebase.firebase.auth)
+    implementation(libs.com.google.firebase.firebase.database)
+    implementation(libs.firebase.messaging)
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.googleid)
 }

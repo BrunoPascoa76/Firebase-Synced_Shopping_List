@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Shopping List</string>
+    <string name="default_web_client_id" translatable="false">361426087817-m1fppube81n2tg35rt6c4mk26i4r1epa.apps.googleusercontent.com</string>
+    <string name="ErrorScreen_title">Something went wrong!</string>
+    <string name="ErrorScreen_retry">Try again</string>
+    <string name="ErrorScreen_LoginErrorMessage">There was an error during login, please try again</string>
 </resources>
