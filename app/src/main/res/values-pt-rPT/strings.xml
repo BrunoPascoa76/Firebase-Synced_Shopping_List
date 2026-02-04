@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Lista de Compras</string>
+    <string name="ErrorScreen_title">Algo correu mal!</string>
+    <string name="ErrorScreen_retry">Tentar novamente</string>
+    <string name="ErrorScreen_LoginErrorMessage">Um erro ocorreu durante o login, por favor tente novamente</string>
+</resources>
