@@ -36,7 +36,7 @@ class AuthManager(private val context: Context) {
             val credential = GoogleAuthProvider.getCredential(googleIdToken, null)
             auth.signInWithCredential(credential).await().user
 
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             // Handle cancellation or errors here
             null
         }
