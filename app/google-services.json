@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "361426087817",
+    "project_id": "shopping-list-e4024",
+    "storage_bucket": "shopping-list-e4024.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:361426087817:android:53c0346821677d3c517b58",
+        "android_client_info": {
+          "package_name": "com.bruno.shoppinglist"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA2MEA7XRbkwsssfv3skfFfVBbZ9olZWO4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
