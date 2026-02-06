@@ -1,4 +1,4 @@
-package com.bruno.shoppinglist
+package com.bruno.shoppinglist.ui
 
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable

@@ -18,6 +18,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import com.bruno.shoppinglist.ui.ErrorScreen
+import com.bruno.shoppinglist.ui.HomeScreen
 import com.bruno.shoppinglist.ui.theme.ShoppingListTheme
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
@@ -40,7 +42,7 @@ class MainActivity : ComponentActivity() {
                         currentUser = auth.currentUser
                     })
                 } else {
-                    HomeScreen(user=currentUser!!)
+                    HomeScreen(user = currentUser!!)
                 }
             }
         }
