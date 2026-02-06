@@ -9,58 +9,60 @@ import com.google.firebase.database.snapshots
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-class ShoppingListRepository(private val listId: String) {
+class ShoppingListRepository {
     private val db= Firebase.database.reference
 
-    private val shoppingListRef=db.child("shopping_lists").child(listId)
+    private val shoppingListRef=db.child("shopping_lists")
 
     init{
         shoppingListRef.keepSynced(true)
     }
 
-    fun observeList(): Flow<ShoppingList?> {
-        return shoppingListRef.snapshots.map { snapshot ->
+    fun observeList(listId: String): Flow<ShoppingList?> {
+        return shoppingListRef.child(listId).snapshots.map { snapshot ->
             snapshot.getValue(ShoppingList::class.java)
         }
     }
 
-    fun changeName(newName: String){
-        shoppingListRef.child("name").setValue(newName)
+    fun changeName(listId: String, newName: String){
+        shoppingListRef.child(listId).child("name").setValue(newName)
     }
 
-    fun addCategory(name: String="General"){
-        val categoryId=shoppingListRef.child("categories").push().key?:return
+    fun addCategory(listId:String, name: String="General"){
+        val categoryId=shoppingListRef.child(listId).child("categories").push().key?:return
         val newCategory= ShoppingListCategory(
             name = name,
             items = emptyMap()
         )
-        shoppingListRef.child("categories").child(categoryId).setValue(newCategory)
+        shoppingListRef.child(listId).child("categories").child(categoryId).setValue(newCategory)
     }
 
-    fun deleteCategory(categoryId: String) {
-        shoppingListRef.child("categories").child(categoryId).removeValue()
+    fun deleteCategory(listId:String, categoryId: String) {
+        shoppingListRef.child(listId).child("categories").child(categoryId).removeValue()
     }
 
-    fun modifyCategory(categoryId: String, newName: String) {
-        shoppingListRef.child("categories").child(categoryId).child("name").setValue(newName)
+    fun modifyCategory(listId:String, categoryId: String, newName: String) {
+        shoppingListRef.child(listId).child("categories").child(categoryId).child("name").setValue(newName)
     }
 
-    fun addItem(categoryId: String, name: String, quantity: Int=1){
-        val itemId=shoppingListRef.child("categories").child(categoryId).child("items").push().key?:return
+    fun addItem(listId:String, categoryId: String, name: String, quantity: Int=1){
+        val itemId=shoppingListRef.child(listId).child("categories").child(categoryId).child("items").push().key?:return
         val newItem= ShoppingListItem(
             name = name,
             quantity = quantity,
             isPurchased = false
         )
 
-        shoppingListRef.child("categories").child(categoryId).child("items").child(itemId).setValue(newItem)
+        shoppingListRef.child(listId).child("categories").child(categoryId).child("items").child(itemId).setValue(newItem)
     }
 
-    fun deleteItem(categoryId: String, itemId: String){
-        shoppingListRef.child("categories").child(categoryId).child("items").child(itemId).removeValue()
+    fun deleteItem(listId:String, categoryId: String, itemId: String){
+        shoppingListRef.child(listId).child("categories").child(categoryId).child("items").child(itemId).removeValue()
     }
 
-    fun modifyItem(categoryId: String, itemId: String, updates: Map<String, Any>){
-        shoppingListRef.child("categories").child(categoryId).child("items").child(itemId).updateChildren(updates)
+    fun modifyItem(listId:String, categoryId: String, itemId: String, updates: Map<String, Any>){
+        shoppingListRef.child(listId).child("categories").child(categoryId).child("items").child(itemId).updateChildren(updates)
     }
+
+
 }

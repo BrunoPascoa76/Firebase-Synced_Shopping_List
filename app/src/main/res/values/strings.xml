@@ -4,4 +4,5 @@
     <string name="ErrorScreen_title">Something went wrong!</string>
     <string name="ErrorScreen_retry">Try again</string>
     <string name="ErrorScreen_LoginErrorMessage">There was an error during login, please try again</string>
+    <string name="HomeScreen_Title" >My Shopping Lists</string>
 </resources>

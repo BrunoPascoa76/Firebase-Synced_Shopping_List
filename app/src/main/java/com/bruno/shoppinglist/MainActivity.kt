@@ -22,9 +22,10 @@ import com.bruno.shoppinglist.ui.ErrorScreen
 import com.bruno.shoppinglist.ui.HomeScreen
 import com.bruno.shoppinglist.ui.theme.ShoppingListTheme
 import com.google.firebase.auth.FirebaseAuth
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
-
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,7 +43,7 @@ class MainActivity : ComponentActivity() {
                         currentUser = auth.currentUser
                     })
                 } else {
-                    HomeScreen(user = currentUser!!)
+                    HomeScreen()
                 }
             }
         }
