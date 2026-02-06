@@ -1,6 +1,7 @@
 package com.bruno.shoppinglist
 
 import android.content.Context
+import android.util.Log
 import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
@@ -34,10 +35,12 @@ class AuthManager(private val context: Context) {
 
             // 4. Give the token to Firebase
             val credential = GoogleAuthProvider.getCredential(googleIdToken, null)
+            Log.d("AuthManager", "Google sign-in successful")
             auth.signInWithCredential(credential).await().user
 
-        } catch (_: Exception) {
+        } catch (e: Exception) {
             // Handle cancellation or errors here
+            Log.e("AuthManager", "Google sign-in failed", e)
             null
         }
     }
