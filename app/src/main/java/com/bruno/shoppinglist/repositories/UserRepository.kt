@@ -6,6 +6,11 @@ import com.bruno.shoppinglist.data.ShoppingListPreview
 import com.bruno.shoppinglist.data.User
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.MutableData
+import com.google.firebase.database.ServerValue
+import com.google.firebase.database.Transaction
 import com.google.firebase.database.database
 import com.google.firebase.database.snapshots
 import kotlinx.coroutines.flow.Flow
@@ -56,12 +61,36 @@ class UserRepository(private val userId: String) {
 
     fun importShoppingList(listId: String){
         userRef.child("myLists").child(listId).setValue(true)
-        Log.d("UserRepository", "Imported shopping list with ID: $listId")
+            .addOnSuccessListener {
+                val listUsersRef = db
+                    .child("shopping_lists")
+                    .child(listId)
+                    .child("users")
+
+                listUsersRef.setValue(ServerValue.increment(1))
+                    .addOnSuccessListener {
+                        Log.d("UserRepository", "List $listId imported and counter incremented")
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e("UserRepository", "Failed to increment counter", e)
+                    }
+            }
+
+        Log.d("UserRepository", "Started import for list ID: $listId")
     }
 
-    fun deleteShoppingList(listId: String){
+    fun deleteShoppingList(listId: String) {
         userRef.child("myLists").child(listId).removeValue()
-        Log.d("UserRepository", "Deleted shopping list with ID: $listId")
-    }
 
+        val listRef = db.child("shopping_lists").child(listId)
+
+        listRef.child("users").setValue(ServerValue.increment(-1))
+
+        listRef.child("users").get().addOnSuccessListener { snapshot ->
+            val count = snapshot.getValue(Int::class.java) ?: 0
+            if (count <= 0) {
+                listRef.removeValue()
+            }
+        }
+    }
 }

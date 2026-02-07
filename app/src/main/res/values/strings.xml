@@ -5,5 +5,9 @@
     <string name="ErrorScreen_retry">Try again</string>
     <string name="ErrorScreen_LoginErrorMessage">There was an error during login, please try again</string>
     <string name="HomeScreen_Title" >My Shopping Lists</string>
-    <string name="HomeScreen_NoListsMessage" >You have no lists yet. Import or create one to start...</string>
+    <string name="HomeScreen_NoListsMessage" >You have no lists yet. Import or create one to start…</string>
+    <string name="Dialog_CreateList_Title" >Create list</string>
+    <string name="Action_OK" >OK</string>
+    <string name="Action_Cancel" >Cancel</string>
+    <string name="Name_Uppercase" >Name</string>
 </resources>

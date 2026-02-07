@@ -3,6 +3,7 @@ package com.bruno.shoppinglist.ui
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,45 +11,49 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.PlaylistAdd
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.rounded.Edit
+import androidx.compose.material.icons.rounded.QrCodeScanner
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.bruno.shoppinglist.viewmodels.AllListsViewModel
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.ListAlt
-import androidx.compose.material.icons.automirrored.rounded.PlaylistAdd
-import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material.icons.rounded.Delete
-import androidx.compose.material.icons.rounded.Edit
-import androidx.compose.material.icons.rounded.ListAlt
-import androidx.compose.material.icons.rounded.PlaylistAdd
-import androidx.compose.material.icons.rounded.QrCodeScanner
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.surfaceColorAtElevation
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import com.bruno.shoppinglist.R
+import com.bruno.shoppinglist.viewmodels.AllListsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -81,25 +86,36 @@ fun HomeScreen(
                 verticalAlignment = Alignment.Bottom
             ) {
                 // QR Import Button
-                SmallFloatingActionButton(
+                FloatingActionButton(
                     onClick = { /* Trigger QR Scanner and call viewModel.importList(id) */ },
                     containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    modifier = Modifier.size(60.dp),
                     shape = RoundedCornerShape(16.dp)
                 ) {
-                    Icon(Icons.Rounded.QrCodeScanner, contentDescription = "Import List")
+                    Icon(Icons.Rounded.QrCodeScanner, contentDescription = "Import List",modifier = Modifier.fillMaxSize(0.75f))
                 }
 
                 // Create List Button
                 FloatingActionButton(
                     onClick = { showAddDialog = true },
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    modifier = Modifier.size(70.dp),
                     shape = RoundedCornerShape(16.dp)
                 ) {
-                    Icon(Icons.Rounded.Add, contentDescription = "New List")
+                    Icon(Icons.Rounded.Add, contentDescription = "New List",modifier = Modifier.fillMaxSize(0.85f))
                 }
             }
         }
     ) { padding ->
+        if (showAddDialog) {
+            CreateListDialog(
+                onDismiss = { showAddDialog = false },
+                onConfirm = { name ->
+                    viewModel.createList(name) // Make sure your ViewModel has this function
+                    showAddDialog = false
+                }
+            )
+        }
         Box(
             modifier = Modifier.fillMaxSize().padding(padding)
         ){
@@ -122,6 +138,20 @@ fun HomeScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
+            }else{
+                LazyColumn(
+                    modifier=Modifier.fillMaxSize(),
+                    contentPadding= PaddingValues(top=8.dp,bottom=80.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(ids, key = { it }) { id ->
+                        ShoppingListRow(
+                            listId = id,
+                            viewModel = viewModel,
+                            navController = navController
+                        )
+                    }
+                }
             }
         }
     }
@@ -137,7 +167,8 @@ fun ShoppingListRow(
         viewModel.getList(listId)
     }.collectAsStateWithLifecycle(initialValue = null)
 
-    var showRenameDialog by remember { mutableStateOf(false) }
+    var isEditing by remember { mutableStateOf(false) }
+    var editedName by remember { mutableStateOf("") }
 
     ElevatedCard(
         onClick = { navController.navigate("list/$listId") },
@@ -153,36 +184,112 @@ fun ShoppingListRow(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = shoppingList?.name ?: "...",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.weight(1f),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-
-
-            Row {
-                IconButton(
-                    onClick = { showRenameDialog = true }
-                ) {
-                    Icon(
-                        Icons.Rounded.Edit,
-                        contentDescription = "Rename List",
-                        tint = MaterialTheme.colorScheme.primary
+            if (isEditing) {
+                OutlinedTextField(
+                    value = editedName,
+                    onValueChange = { editedName = it },
+                    label = { Text(stringResource(R.string.Name_Uppercase)) },
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(end = 8.dp),
+                    singleLine = true,
+                    shape = RoundedCornerShape(12.dp),
+                    textStyle = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    ),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant
                     )
+                )
+
+                Row {
+                    IconButton(onClick = {
+                        viewModel.renameList(listId, editedName)
+                        isEditing = false
+                    }) {
+                        Icon(Icons.Rounded.Check, "Confirm", tint = MaterialTheme.colorScheme.primary)
+                    }
+                    IconButton(onClick = { isEditing = false }) {
+                        Icon(Icons.Rounded.Close, "Cancel", tint = MaterialTheme.colorScheme.error)
+                    }
                 }
-                IconButton(
-                    onClick = { viewModel.removeList(listId) }
-                ) {
-                    Icon(
-                        Icons.Rounded.Delete,
-                        contentDescription = "Delete List",
-                        tint = MaterialTheme.colorScheme.error
-                    )
+            } else {
+                Text(
+                    text = shoppingList?.name ?: "...",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.weight(1f).padding(start = 10.dp),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+
+
+                Row {
+                    IconButton(
+                        onClick = {
+                            editedName=shoppingList?.name?:""
+                            isEditing = true
+                        }
+                    ) {
+                        Icon(
+                            Icons.Rounded.Edit,
+                            contentDescription = "Rename List",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                    IconButton(
+                        onClick = { viewModel.removeList(listId) }
+                    ) {
+                        Icon(
+                            Icons.Rounded.Delete,
+                            contentDescription = "Delete List",
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                    }
                 }
             }
         }
     }
+}
+
+@Composable
+fun CreateListDialog(
+    onDismiss: ()->Unit,
+    onConfirm: (String)->Unit
+){
+    var listName by remember{mutableStateOf("")}
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(text = stringResource(R.string.Dialog_CreateList_Title))
+        },
+        text = {
+            Column {
+                OutlinedTextField(
+                    value = listName,
+                    onValueChange = { listName = it },
+                    label = { Text(stringResource(R.string.Name_Uppercase)) },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp)
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(
+                enabled = listName.isNotBlank(), // Only allow "OK" if there's text
+                onClick = { onConfirm(listName) }
+            ) {
+                Text(stringResource(R.string.Action_OK))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.Action_Cancel))
+            }
+        }
+    )
 }
