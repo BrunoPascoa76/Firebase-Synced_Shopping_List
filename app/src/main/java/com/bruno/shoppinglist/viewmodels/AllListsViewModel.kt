@@ -2,9 +2,11 @@ package com.bruno.shoppinglist.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.bruno.shoppinglist.data.ShoppingList
 import com.bruno.shoppinglist.repositories.ShoppingListRepository
 import com.bruno.shoppinglist.repositories.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
@@ -36,4 +38,5 @@ class AllListsViewModel @Inject constructor(
 
     fun renameList(id: String, newName: String) = shoppingListRepository.changeName(id, newName)
 
+    fun getList(id: String): Flow<ShoppingList?> = shoppingListRepository.observeList(id)
 }

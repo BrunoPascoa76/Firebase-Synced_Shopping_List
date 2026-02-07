@@ -5,4 +5,5 @@
     <string name="ErrorScreen_retry">Tentar novamente</string>
     <string name="ErrorScreen_LoginErrorMessage">Um erro ocorreu durante o login, por favor tente novamente</string>
     <string name="HomeScreen_Title" >As minhas listas de compras</string>
+    <string name="HomeScreen_NoListsMessage" >Não possui nenhuma lista. Importe ou crie uma para começar...</string>
 </resources>
