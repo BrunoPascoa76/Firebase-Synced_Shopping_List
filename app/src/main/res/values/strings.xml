@@ -12,4 +12,6 @@
     <string name="Name_Uppercase" >Name</string>
     <string name="ShoppingListDetails_NoCategories" >Your list is empty. Please add a new category…</string>
     <string name="ShoppingListDetails_CategoryAdd" >Add new category</string>
+    <string name="ShoppingListDetails_ItemAdd" >Add new item</string>
+    <string name="Category_Empty" >No items</string>
 </resources>

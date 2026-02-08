@@ -22,7 +22,6 @@ import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.QrCodeScanner
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -34,7 +33,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
@@ -108,7 +106,9 @@ fun HomeScreen(
         }
     ) { padding ->
         if (showAddDialog) {
-            CreateListDialog(
+            TextDialog(
+                title=stringResource(R.string.Dialog_CreateList_Title),
+                label=stringResource(R.string.Name_Uppercase),
                 onDismiss = { showAddDialog = false },
                 onConfirm = { name ->
                     viewModel.createList(name) // Make sure your ViewModel has this function
@@ -252,44 +252,4 @@ fun ShoppingListRow(
             }
         }
     }
-}
-
-@Composable
-fun CreateListDialog(
-    onDismiss: ()->Unit,
-    onConfirm: (String)->Unit
-){
-    var listName by remember{mutableStateOf("")}
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = {
-            Text(text = stringResource(R.string.Dialog_CreateList_Title))
-        },
-        text = {
-            Column {
-                OutlinedTextField(
-                    value = listName,
-                    onValueChange = { listName = it },
-                    label = { Text(stringResource(R.string.Name_Uppercase)) },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp)
-                )
-            }
-        },
-        confirmButton = {
-            TextButton(
-                enabled = listName.isNotBlank(), // Only allow "OK" if there's text
-                onClick = { onConfirm(listName) }
-            ) {
-                Text(stringResource(R.string.Action_OK))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.Action_Cancel))
-            }
-        }
-    )
 }

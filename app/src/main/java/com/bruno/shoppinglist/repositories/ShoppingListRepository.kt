@@ -50,7 +50,7 @@ class ShoppingListRepository {
         val newItem= ShoppingListItem(
             name = name,
             quantity = quantity,
-            isPurchased = false
+            purchased = false
         )
 
         shoppingListRef.child(listId).child("categories").child(categoryId).child("items").child(itemId).setValue(newItem)
@@ -63,6 +63,4 @@ class ShoppingListRepository {
     fun modifyItem(listId:String, categoryId: String, itemId: String, updates: Map<String, Any>){
         shoppingListRef.child(listId).child("categories").child(categoryId).child("items").child(itemId).updateChildren(updates)
     }
-
-
 }
