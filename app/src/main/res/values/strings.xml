@@ -10,4 +10,6 @@
     <string name="Action_OK" >OK</string>
     <string name="Action_Cancel" >Cancel</string>
     <string name="Name_Uppercase" >Name</string>
+    <string name="ShoppingListDetails_NoCategories" >Your list is empty. Please add a new category…</string>
+    <string name="ShoppingListDetails_CategoryAdd" >Add new category</string>
 </resources>

@@ -18,8 +18,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.bruno.shoppinglist.ui.ErrorScreen
 import com.bruno.shoppinglist.ui.HomeScreen
+import com.bruno.shoppinglist.ui.ListDetailsScreen
 import com.bruno.shoppinglist.ui.theme.ShoppingListTheme
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.AndroidEntryPoint
@@ -36,6 +42,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             ShoppingListTheme {
                 var currentUser by remember { mutableStateOf(auth.currentUser) }
+                val navController = rememberNavController()
+
 
                 if (currentUser == null) {
                     LoginScreen(onLoginSuccess = {
@@ -43,7 +51,27 @@ class MainActivity : ComponentActivity() {
                         currentUser = auth.currentUser
                     })
                 } else {
-                    HomeScreen()
+                    NavHost(
+                        navController = navController,
+                        startDestination = "home"
+                    ) {
+                        // Home Screen Route
+                        composable("home") {
+                            HomeScreen(navController = navController)
+                        }
+
+                        // Details Screen Route with ID Argument
+                        composable(
+                            route = "list/{listId}",
+                            arguments = listOf(navArgument("listId") { type = NavType.StringType })
+                        ) { backStackEntry ->
+                            val listId = backStackEntry.arguments?.getString("listId") ?: ""
+                            ListDetailsScreen(
+                                listId = listId,
+                                navController = navController
+                            )
+                        }
+                    }
                 }
             }
         }
