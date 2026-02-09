@@ -31,7 +31,7 @@ jobs:
 
       - name: Build Signed Release APK
         env:
-          KEYSTORE_FILE: app/keystore.jks
+          KEYSTORE_FILE: keystore.jks
         run: |
           ./gradlew assembleRelease \
             -Pandroid.injected.signing.store.file="$KEYSTORE_FILE" \
