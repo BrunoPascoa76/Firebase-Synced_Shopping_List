@@ -14,4 +14,11 @@
     <string name="ShoppingListDetails_CategoryAdd" >Add new category</string>
     <string name="ShoppingListDetails_ItemAdd" >Add new item</string>
     <string name="Category_Empty" >No items</string>
+    <string name="ShareList_Title" >Share Shopping List</string>
+    <string name="Action_Close" >Close</string>
+    <string name="ShareList_Instructions" >In the other device, click on the QR Code icon on the main page and then scan this Qr Code</string>
+    <string name="Import_Instructions" >Import by scanning the QR Code</string>
+    <string name="Scan_Title" >Scan QR Code</string>
+    <string name="Camera_Permission" >Please grant camera permission</string>
+    <string name="QRCodeScan_Instructions" >Point the camera to the QR Code</string>
 </resources>

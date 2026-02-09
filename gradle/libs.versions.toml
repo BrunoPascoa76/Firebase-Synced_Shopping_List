@@ -1,8 +1,11 @@
 [versions]
 agp = "9.0.0"
+barcodeScanning = "17.3.0"
+cameraCore = "1.5.3"
 coreKtx = "1.17.0"
 credentialsPlayServicesAuth = "1.5.0"
-firebaseBom = "34.8.0"
+firebaseBom = "34.9.0"
+zxing = "3.5.4"
 googleid = "1.2.0"
 hiltAndroid = "2.59.1"
 hiltAndroidCompiler = "2.59.1"
@@ -17,11 +20,16 @@ composeBom = "2026.01.01"
 foundation = "1.10.2"
 
 [libraries]
+androidx-camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "cameraCore" }
+androidx-camera-core = { module = "androidx.camera:camera-core", version.ref = "cameraCore" }
+androidx-camera-lifecycle = { module = "androidx.camera:camera-lifecycle", version.ref = "cameraCore" }
+androidx-camera-view = { module = "androidx.camera:camera-view", version.ref = "cameraCore" }
 androidx-compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-credentials = { module = "androidx.credentials:credentials", version.ref = "credentialsPlayServicesAuth" }
 androidx-credentials-play-services-auth = { module = "androidx.credentials:credentials-play-services-auth", version.ref = "credentialsPlayServicesAuth" }
 androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
+barcode-scanning = { module = "com.google.mlkit:barcode-scanning", version.ref = "barcodeScanning" }
 com-google-firebase-firebase-auth = { module = "com.google.firebase:firebase-auth" }
 com-google-firebase-firebase-database = { module = "com.google.firebase:firebase-database" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
@@ -43,6 +51,7 @@ androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-
 androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
 androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundation" }
+zxing-core = { group = "com.google.zxing", name = "core", version.ref = "zxing" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

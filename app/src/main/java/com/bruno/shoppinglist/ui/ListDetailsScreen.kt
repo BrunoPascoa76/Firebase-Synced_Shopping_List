@@ -88,6 +88,7 @@ fun ListDetailsScreen(
 ) {
     val shoppingList by viewModel.getList(listId).collectAsStateWithLifecycle(initialValue = null)
     var showAddCategoryDialog by remember { mutableStateOf(false) }
+    var showShareDialog by remember { mutableStateOf(false) }
 
     if (showAddCategoryDialog) {
         TextDialog(
@@ -99,6 +100,10 @@ fun ListDetailsScreen(
                 showAddCategoryDialog = false
             }
         )
+    }
+
+    if(showShareDialog){
+        QRCodeDisplayDialog(listId) { showShareDialog=false }
     }
 
     Scaffold(
@@ -125,7 +130,7 @@ fun ListDetailsScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { /* Share logic */ }) {
+                    IconButton(onClick = { showShareDialog=true }) {
                         Icon(
                             imageVector = Icons.Rounded.Share,
                             contentDescription = "Share List",

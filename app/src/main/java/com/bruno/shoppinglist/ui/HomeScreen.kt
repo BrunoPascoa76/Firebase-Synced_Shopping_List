@@ -61,6 +61,26 @@ fun HomeScreen(
 ) {
     val ids by viewModel.shoppingListIds.collectAsStateWithLifecycle()
     var showAddDialog by remember { mutableStateOf(false) }
+    var showImportDialog by remember { mutableStateOf(false) }
+
+    if (showAddDialog) {
+        TextDialog(
+            title=stringResource(R.string.Dialog_CreateList_Title),
+            label=stringResource(R.string.Name_Uppercase),
+            onDismiss = { showAddDialog = false },
+            onConfirm = { name ->
+                viewModel.createList(name) // Make sure your ViewModel has this function
+                showAddDialog = false
+            }
+        )
+    }
+
+    if(showImportDialog){
+        QrScannerDialog(
+            onDismiss = {showImportDialog=false},
+            onCodeDetected = {id->viewModel.importList(id)}
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -85,7 +105,7 @@ fun HomeScreen(
             ) {
                 // QR Import Button
                 FloatingActionButton(
-                    onClick = { /* Trigger QR Scanner and call viewModel.importList(id) */ },
+                    onClick = { showImportDialog=true },
                     containerColor = MaterialTheme.colorScheme.secondaryContainer,
                     modifier = Modifier.size(60.dp),
                     shape = RoundedCornerShape(16.dp)
@@ -105,17 +125,7 @@ fun HomeScreen(
             }
         }
     ) { padding ->
-        if (showAddDialog) {
-            TextDialog(
-                title=stringResource(R.string.Dialog_CreateList_Title),
-                label=stringResource(R.string.Name_Uppercase),
-                onDismiss = { showAddDialog = false },
-                onConfirm = { name ->
-                    viewModel.createList(name) // Make sure your ViewModel has this function
-                    showAddDialog = false
-                }
-            )
-        }
+
         Box(
             modifier = Modifier.fillMaxSize().padding(padding)
         ){
