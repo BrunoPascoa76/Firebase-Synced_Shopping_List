@@ -23,11 +23,21 @@ jobs:
           distribution: 'temurin'
           cache: 'gradle'
 
+      - name: Restore keystore from secret
+        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > app/keystore.jks
+
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Build Debug APK
-        run: ./gradlew assembleDebug
+      - name: Build Signed Release APK
+        env:
+          KEYSTORE_FILE: app/keystore.jks
+        run: |
+          ./gradlew assembleRelease \
+            -Pandroid.injected.signing.store.file="$KEYSTORE_FILE" \
+            -Pandroid.injected.signing.store.password="${{ secrets.SIGNING_STORE_PASSWORD }}" \
+            -Pandroid.injected.signing.key.alias="${{ secrets.SIGNING_KEY_ALIAS }}" \
+            -Pandroid.injected.signing.key.password="${{ secrets.SIGNING_KEY_PASSWORD }}"
 
       - name: Create Release
         id: create_release
