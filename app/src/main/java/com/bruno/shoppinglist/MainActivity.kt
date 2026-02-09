@@ -18,6 +18,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -45,32 +47,30 @@ class MainActivity : ComponentActivity() {
                 val navController = rememberNavController()
 
 
-                if (currentUser == null) {
-                    LoginScreen(onLoginSuccess = {
-                        // 3. Update the state! This triggers the UI to switch to HomeScreen
-                        currentUser = auth.currentUser
-                    })
-                } else {
-                    NavHost(
-                        navController = navController,
-                        startDestination = "home"
-                    ) {
-                        // Home Screen Route
-                        composable("home") {
-                            HomeScreen(navController = navController)
+                NavHost(
+                    navController = navController,
+                    startDestination = "auth"
+                ) {
+                    // Home Screen Route
+                    composable("home") {
+                        HomeScreen(navController = navController)
+                    }
+                    composable("auth"){
+                        LoginScreen(navController) {
+                            navController.navigate("home")
                         }
+                    }
 
-                        // Details Screen Route with ID Argument
-                        composable(
-                            route = "list/{listId}",
-                            arguments = listOf(navArgument("listId") { type = NavType.StringType })
-                        ) { backStackEntry ->
-                            val listId = backStackEntry.arguments?.getString("listId") ?: ""
-                            ListDetailsScreen(
-                                listId = listId,
-                                navController = navController
-                            )
-                        }
+                    // Details Screen Route with ID Argument
+                    composable(
+                        route = "list/{listId}",
+                        arguments = listOf(navArgument("listId") { type = NavType.StringType })
+                    ) { backStackEntry ->
+                        val listId = backStackEntry.arguments?.getString("listId") ?: ""
+                        ListDetailsScreen(
+                            listId = listId,
+                            navController = navController
+                        )
                     }
                 }
             }
@@ -80,7 +80,8 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun LoginScreen(
-    onLoginSuccess: () -> Unit = {}
+    navController: NavController,
+    onLoginSuccess: (NavController) -> Unit = {}
 ){
     val context= LocalContext.current
     val scope = rememberCoroutineScope()
@@ -95,7 +96,7 @@ fun LoginScreen(
         scope.launch {
             val user = authManager.googleSignIn()
             if (user != null) {
-                onLoginSuccess()
+                onLoginSuccess(navController)
             } else {
                 isLoading = false
                 hasError = true
@@ -104,7 +105,11 @@ fun LoginScreen(
     }
 
     LaunchedEffect(Unit) {
-        attemptSignIn()
+        if(authManager.getCurrentUser()!=null){
+            onLoginSuccess(navController)
+        }else {
+            attemptSignIn()
+        }
     }
 
     Box(

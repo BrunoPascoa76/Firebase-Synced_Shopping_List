@@ -15,6 +15,10 @@ class AuthManager(private val context: Context) {
     private val auth = FirebaseAuth.getInstance()
     private val credentialManager = CredentialManager.create(context)
 
+    fun getCurrentUser(): FirebaseUser?{
+        return auth.currentUser
+    }
+
     suspend fun googleSignIn(): FirebaseUser? {
         return try {
             // 1. Configure the Google request
