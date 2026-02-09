@@ -39,4 +39,5 @@ class AllListsViewModel @Inject constructor(
     fun renameList(id: String, newName: String) = shoppingListRepository.changeName(id, newName)
 
     fun getList(id: String): Flow<ShoppingList?> = shoppingListRepository.observeList(id)
+
 }

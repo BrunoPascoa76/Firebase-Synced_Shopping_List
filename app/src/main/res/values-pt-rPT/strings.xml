@@ -14,4 +14,11 @@
     <string name="ShoppingListDetails_CategoryAdd" >Adicionar nova categoria</string>
     <string name="ShoppingListDetails_ItemAdd" >Adicionar novo item</string>
     <string name="Category_Empty" >Sem items</string>
+    <string name="ShareList_Title" >Partilhar lista de compras</string>
+    <string name="Action_Close" >Fechar</string>
+    <string name="ShareList_Instructions" >Na página principal do outro dispositivo, carregue no botão com o código QR e analise este código para partilhar a lista de compras</string>
+    <string name="Import_Instructions" >Importar lista via código QR</string>
+    <string name="Scan_Title" >Analisar código QR</string>
+    <string name="Camera_Permission" >Por favor permita o uso da câmara</string>
+    <string name="QRCodeScan_Instructions" >Aponte a câmara para o código QR</string>
 </resources>
