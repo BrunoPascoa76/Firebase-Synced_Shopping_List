@@ -51,6 +51,6 @@ jobs:
           name: Release v${{ github.run_number }}
           draft: false
           prerelease: false
-          files: app/build/outputs/apk/debug/app-debug.apk
-        env:
+          files: app/build/outputs/apk/release/app-release.apk
+          env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
