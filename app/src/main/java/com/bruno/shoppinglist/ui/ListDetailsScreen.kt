@@ -6,7 +6,10 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.MarqueeAnimationMode
+import androidx.compose.foundation.MarqueeSpacing
 import androidx.compose.foundation.background
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -292,48 +295,131 @@ fun CategoryCard(
 }
 
 @Composable
-fun AddCategoryButton(onClick: () -> Unit) {
-    OutlinedButton(
-        onClick = onClick,
+fun ShoppingItemRow(
+    listId: String,
+    categoryId: String,
+    itemId: String,
+    item: ShoppingListItem,
+    viewModel: ListDetailsViewModel
+) {
+    var isChecked by remember { mutableStateOf(item.purchased) }
+    val dismissState = rememberSwipeToDismissBoxState()
+
+    LaunchedEffect(dismissState.currentValue) {
+        if (dismissState.currentValue == SwipeToDismissBoxValue.EndToStart) {
+            viewModel.deleteItem(listId, categoryId, itemId)
+        }
+    }
+
+    val textColor = if (isChecked) {
+        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) // Greyed out
+    } else {
+        MaterialTheme.colorScheme.onSurface
+    }
+    val textDecoration = if (isChecked) TextDecoration.LineThrough else TextDecoration.None
+
+
+    Row(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 16.dp),
-        shape = RoundedCornerShape(16.dp),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-        contentPadding = PaddingValues(16.dp)
+            .fillMaxWidth().padding(horizontal = 3.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(
-            imageVector = Icons.Rounded.CreateNewFolder,
-            contentDescription = null
-        )
-        Spacer(Modifier.width(12.dp))
+        // 2. The Quantity "Square"
+        Surface(
+            modifier = Modifier.size(40.dp),
+            shape = RoundedCornerShape(8.dp),
+            color = MaterialTheme.colorScheme.secondaryContainer,
+            tonalElevation = 2.dp
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Text(
+                    text = item.quantity.toString(),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.width(12.dp))
+
+        // 3. The Item Name (Taking up available space)
         Text(
-            text = stringResource(R.string.ShoppingListDetails_CategoryAdd),
-            style = MaterialTheme.typography.labelLarge
+            text = item.name,
+            modifier = Modifier
+                .weight(1f)
+                .basicMarquee(
+                    iterations = Int.MAX_VALUE,    // Loop forever
+                    animationMode = MarqueeAnimationMode.Immediately,
+                    initialDelayMillis = 1000,            // Pause for 1s before starting/restarting
+                    spacing = MarqueeSpacing.fractionOfContainer(1f/3f) // Gap between loops
+                ),
+            style = MaterialTheme.typography.bodyLarge.copy(
+                textDecoration = textDecoration
+            ),
+            color = textColor
+        )
+
+        // 4. The Checkmark
+        Checkbox(
+            checked = isChecked,
+            onCheckedChange = {
+                isChecked = !isChecked
+                viewModel.toggleItemPurchased(listId, categoryId, itemId, isChecked)
+            }
         )
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddItemButton(onClick: () -> Unit) {
-    OutlinedButton(
-        onClick = onClick,
+fun SwipeToDeleteWrapper(
+    onDelete: () -> Unit,
+    content: @Composable () -> Unit
+) {
+    val dismissState = rememberSwipeToDismissBoxState()
+
+    // Trigger the delete action when the swipe settles in the 'EndToStart' position
+    LaunchedEffect(dismissState.currentValue) {
+        if (dismissState.currentValue == SwipeToDismissBoxValue.EndToStart) {
+            onDelete()
+        }
+    }
+
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 16.dp),
-        shape = RoundedCornerShape(16.dp),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-        contentPadding = PaddingValues(16.dp)
+            .padding(vertical = 4.dp, horizontal = 16.dp)
+            .clip(RoundedCornerShape(20.dp)) // Ensures background doesn't leak out of corners
     ) {
-        Icon(
-            imageVector = Icons.AutoMirrored.Rounded.PlaylistAdd,
-            contentDescription = null
-        )
-        Spacer(Modifier.width(12.dp))
-        Text(
-            text = stringResource(R.string.ShoppingListDetails_ItemAdd),
-            style = MaterialTheme.typography.labelLarge
-        )
+        SwipeToDismissBox(
+            state = dismissState,
+            enableDismissFromStartToEnd = false,
+            backgroundContent = {
+                // The "Danger Zone" that stays underneath
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.errorContainer),
+                    contentAlignment = Alignment.CenterEnd
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Delete",
+                        modifier = Modifier.padding(end = 16.dp),
+                        tint = MaterialTheme.colorScheme.onErrorContainer
+                    )
+                }
+            }
+        ) {
+            // The actual content (your Card or Row)
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                color = MaterialTheme.colorScheme.surfaceContainer, // Use the "just right" color we found earlier
+                shape = RoundedCornerShape(20.dp) // Keeps the corners clean
+            ) {
+                content()
+            }
+        }
     }
 }
 
@@ -407,124 +493,47 @@ fun ItemDialog(
 }
 
 @Composable
-fun ShoppingItemRow(
-    listId: String,
-    categoryId: String,
-    itemId: String,
-    item: ShoppingListItem,
-    viewModel: ListDetailsViewModel
-) {
-    var isChecked by remember { mutableStateOf(item.purchased) }
-    val dismissState = rememberSwipeToDismissBoxState()
-
-    LaunchedEffect(dismissState.currentValue) {
-        if (dismissState.currentValue == SwipeToDismissBoxValue.EndToStart) {
-            viewModel.deleteItem(listId, categoryId, itemId)
-        }
-    }
-
-    val textColor = if (isChecked) {
-        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f) // Greyed out
-    } else {
-        MaterialTheme.colorScheme.onSurface
-    }
-    val textDecoration = if (isChecked) TextDecoration.LineThrough else TextDecoration.None
-
-
-    Row(
+fun AddCategoryButton(onClick: () -> Unit) {
+    OutlinedButton(
+        onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp, horizontal = 12.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .padding(vertical = 16.dp),
+        shape = RoundedCornerShape(16.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+        contentPadding = PaddingValues(16.dp)
     ) {
-        // 2. The Quantity "Square"
-        Surface(
-            modifier = Modifier.size(40.dp),
-            shape = RoundedCornerShape(8.dp),
-            color = MaterialTheme.colorScheme.secondaryContainer,
-            tonalElevation = 2.dp
-        ) {
-            Box(contentAlignment = Alignment.Center) {
-                Text(
-                    text = item.quantity.toString(),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onSecondaryContainer
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.width(12.dp))
-
-        // 3. The Item Name (Taking up available space)
-        Text(
-            text = item.name,
-            modifier = Modifier.weight(1f),
-            style = MaterialTheme.typography.bodyLarge.copy(
-                textDecoration = textDecoration
-            ),
-            color = textColor
+        Icon(
+            imageVector = Icons.Rounded.CreateNewFolder,
+            contentDescription = null
         )
-
-        // 4. The Checkmark
-        Checkbox(
-            checked = isChecked,
-            onCheckedChange = {
-                isChecked = !isChecked
-                viewModel.toggleItemPurchased(listId, categoryId, itemId, isChecked)
-            }
+        Spacer(Modifier.width(12.dp))
+        Text(
+            text = stringResource(R.string.ShoppingListDetails_CategoryAdd),
+            style = MaterialTheme.typography.labelLarge
         )
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SwipeToDeleteWrapper(
-    onDelete: () -> Unit,
-    content: @Composable () -> Unit
-) {
-    val dismissState = rememberSwipeToDismissBoxState()
-
-    // Trigger the delete action when the swipe settles in the 'EndToStart' position
-    LaunchedEffect(dismissState.currentValue) {
-        if (dismissState.currentValue == SwipeToDismissBoxValue.EndToStart) {
-            onDelete()
-        }
-    }
-
-    Box(
+fun AddItemButton(onClick: () -> Unit) {
+    OutlinedButton(
+        onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp, horizontal = 16.dp)
-            .clip(RoundedCornerShape(20.dp)) // Ensures background doesn't leak out of corners
+            .padding(vertical = 16.dp),
+        shape = RoundedCornerShape(16.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+        contentPadding = PaddingValues(16.dp)
     ) {
-        SwipeToDismissBox(
-            state = dismissState,
-            enableDismissFromStartToEnd = false,
-            backgroundContent = {
-                // The "Danger Zone" that stays underneath
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.errorContainer),
-                    contentAlignment = Alignment.CenterEnd
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = "Delete",
-                        modifier = Modifier.padding(end = 16.dp),
-                        tint = MaterialTheme.colorScheme.onErrorContainer
-                    )
-                }
-            }
-        ) {
-            // The actual content (your Card or Row)
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                color = MaterialTheme.colorScheme.surfaceContainer, // Use the "just right" color we found earlier
-                shape = RoundedCornerShape(20.dp) // Keeps the corners clean
-            ) {
-                content()
-            }
-        }
+        Icon(
+            imageVector = Icons.AutoMirrored.Rounded.PlaylistAdd,
+            contentDescription = null
+        )
+        Spacer(Modifier.width(12.dp))
+        Text(
+            text = stringResource(R.string.ShoppingListDetails_ItemAdd),
+            style = MaterialTheme.typography.labelLarge
+        )
     }
 }
