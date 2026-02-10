@@ -66,7 +66,11 @@ class MainActivity : ComponentActivity() {
                     }
                     composable("auth") {
                         LoginScreen(navController) {
-                            navController.navigate("home")
+                            navController.navigate("home"){
+                                popUpTo("auth") {
+                                    inclusive = true
+                                }
+                            }
                         }
                     }
 

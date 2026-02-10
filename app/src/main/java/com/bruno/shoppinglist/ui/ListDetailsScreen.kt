@@ -57,6 +57,7 @@ import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -102,8 +103,8 @@ fun ListDetailsScreen(
         )
     }
 
-    if(showShareDialog){
-        QRCodeDisplayDialog(listId) { showShareDialog=false }
+    if (showShareDialog) {
+        QRCodeDisplayDialog(listId) { showShareDialog = false }
     }
 
     Scaffold(
@@ -130,7 +131,7 @@ fun ListDetailsScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { showShareDialog=true }) {
+                    IconButton(onClick = { showShareDialog = true }) {
                         Icon(
                             imageVector = Icons.Rounded.Share,
                             contentDescription = "Share List",
@@ -173,19 +174,12 @@ fun ListDetailsScreen(
                 }
             }
             items(categoryEntries, key = { it.key }) { categoryEntry ->
-                SwipeToDeleteWrapper(onDelete = {
-                    viewModel.deleteCategory(
-                        listId,
-                        categoryEntry.key
-                    )
-                }) {
-                    CategoryCard(
-                        listId = listId,
-                        categoryId = categoryEntry.key,
-                        category = categoryEntry.value,
-                        viewModel = viewModel
-                    )
-                }
+                CategoryCard(
+                    listId = listId,
+                    categoryId = categoryEntry.key,
+                    category = categoryEntry.value,
+                    viewModel = viewModel
+                )
             }
 
             item {
@@ -254,18 +248,10 @@ fun CategoryCard(
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.weight(1f)
                 )
-                // Optional: Show item count badge
-                Surface(
-                    shape = CircleShape,
-                    color = MaterialTheme.colorScheme.primaryContainer,
-                    modifier = Modifier.size(24.dp)
+                IconButton(
+                    onClick = {viewModel.deleteCategory(listId,categoryId)}
                 ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Text(
-                            "${category.items.size}",
-                            style = MaterialTheme.typography.labelSmall
-                        )
-                    }
+                    Icon(Icons.Filled.Delete, contentDescription = "Delete category")
                 }
             }
 
@@ -286,8 +272,16 @@ fun CategoryCard(
                         Text(text = stringResource(R.string.Category_Empty))
                     }
                     category.items.forEach { item ->
-                        SwipeToDeleteWrapper(onDelete = {viewModel.deleteItem(listId,categoryId,item.key)}) {
-                            ShoppingItemRow(listId, categoryId, item.key, item.value, viewModel)
+                        key(item.key) {
+                            SwipeToDeleteWrapper(onDelete = {
+                                viewModel.deleteItem(
+                                    listId,
+                                    categoryId,
+                                    item.key
+                                )
+                            }) {
+                                ShoppingItemRow(listId, categoryId, item.key, item.value, viewModel)
+                            }
                         }
                     }
                     AddItemButton { showAddItemDialog = true }
@@ -385,7 +379,7 @@ fun ItemDialog(
                             }
                         }
                     },
-                    label = { Text("Quantity") },
+                    label = { Text(stringResource(R.string.Quantity)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
@@ -437,50 +431,48 @@ fun ShoppingItemRow(
     val textDecoration = if (isChecked) TextDecoration.LineThrough else TextDecoration.None
 
 
-    SwipeToDeleteWrapper(onDelete = { viewModel.deleteItem(listId, categoryId, itemId) }) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp, horizontal = 12.dp),
-            verticalAlignment = Alignment.CenterVertically
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp, horizontal = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // 2. The Quantity "Square"
+        Surface(
+            modifier = Modifier.size(40.dp),
+            shape = RoundedCornerShape(8.dp),
+            color = MaterialTheme.colorScheme.secondaryContainer,
+            tonalElevation = 2.dp
         ) {
-            // 2. The Quantity "Square"
-            Surface(
-                modifier = Modifier.size(40.dp),
-                shape = RoundedCornerShape(8.dp),
-                color = MaterialTheme.colorScheme.secondaryContainer,
-                tonalElevation = 2.dp
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Text(
-                        text = item.quantity.toString(),
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer
-                    )
-                }
+            Box(contentAlignment = Alignment.Center) {
+                Text(
+                    text = item.quantity.toString(),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                )
             }
-
-            Spacer(modifier = Modifier.width(12.dp))
-
-            // 3. The Item Name (Taking up available space)
-            Text(
-                text = item.name,
-                modifier = Modifier.weight(1f),
-                style = MaterialTheme.typography.bodyLarge.copy(
-                    textDecoration = textDecoration
-                ),
-                color = textColor
-            )
-
-            // 4. The Checkmark
-            Checkbox(
-                checked = isChecked,
-                onCheckedChange = {
-                    isChecked = !isChecked
-                    viewModel.toggleItemPurchased(listId, categoryId, itemId, isChecked)
-                }
-            )
         }
+
+        Spacer(modifier = Modifier.width(12.dp))
+
+        // 3. The Item Name (Taking up available space)
+        Text(
+            text = item.name,
+            modifier = Modifier.weight(1f),
+            style = MaterialTheme.typography.bodyLarge.copy(
+                textDecoration = textDecoration
+            ),
+            color = textColor
+        )
+
+        // 4. The Checkmark
+        Checkbox(
+            checked = isChecked,
+            onCheckedChange = {
+                isChecked = !isChecked
+                viewModel.toggleItemPurchased(listId, categoryId, itemId, isChecked)
+            }
+        )
     }
 }
 

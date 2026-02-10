@@ -22,4 +22,5 @@
     <string name="Camera_Permission" >Please grant camera permission</string>
     <string name="QRCodeScan_Instructions" >Point the camera to the QR Code</string>
     <string name="GooglePrompt" >Login with Google</string>
+    <string name="Quantity" >Quantity</string>
 </resources>
