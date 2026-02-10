@@ -1,4 +1,4 @@
-[![Build & Release APK](https://github.com/BrunoPascoa76/Firebase-Synced_Shopping_List/actions/workflows/main.yml/badge.svg)](https://github.com/BrunoPascoa76/Firebase-Synced_Shopping_List/actions/workflows/main.yml)
+[![Latest Release](https://img.shields.io/github/release/BrunoPascoa76/Firebase-Synced_Shopping_List.svg)](https://github.com/BrunoPascoa76/Firebase-Synced_Shopping_List/releases/latest)
 
 # Firebase-Synced Shopping List
 
