@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "361426087817",
+    "firebase_url": "https://shopping-list-e4024-default-rtdb.firebaseio.com",
     "project_id": "shopping-list-e4024",
     "storage_bucket": "shopping-list-e4024.firebasestorage.app"
   },
@@ -12,7 +13,28 @@
           "package_name": "com.bruno.shoppinglist"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "361426087817-8cegujvc5qdhuf7nlenbijd5mkt8svjb.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.bruno.shoppinglist",
+            "certificate_hash": "855c43eec0d54e87e80f1fce5b0ad19c8ca642e5"
+          }
+        },
+        {
+          "client_id": "361426087817-hu3bi0u89kqcto81g1oj8sa67upcksam.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.bruno.shoppinglist",
+            "certificate_hash": "e2e6d691fd607514a083bed86f2c65664c6fc135"
+          }
+        },
+        {
+          "client_id": "361426087817-m1fppube81n2tg35rt6c4mk26i4r1epa.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyA2MEA7XRbkwsssfv3skfFfVBbZ9olZWO4"
@@ -20,7 +42,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "361426087817-m1fppube81n2tg35rt6c4mk26i4r1epa.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
