@@ -4,10 +4,14 @@ on:
   push:
     branches:
       - master
+  pull_request:
+    types: [closed]
+    branches: [master]
   workflow_dispatch: # Allows manual trigger from the Actions tab
 
 jobs:
   build:
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true || github.event_name == 'push'
     runs-on: ubuntu-latest
     permissions:
       contents: write # Required to create the release
@@ -47,6 +51,6 @@ jobs:
           name: Release v${{ github.run_number }}
           draft: false
           prerelease: false
-          files: app/build/outputs/apk/debug/app-debug.apk
-        env:
+          files: app/build/outputs/apk/release/app-release.apk
+          env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
