@@ -1,6 +1,7 @@
 package com.bruno.shoppinglist.ui
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -20,18 +21,23 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.PlaylistAdd
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.DragHandle
 import androidx.compose.material.icons.rounded.CreateNewFolder
 import androidx.compose.material.icons.rounded.KeyboardArrowDown
 import androidx.compose.material.icons.rounded.KeyboardArrowUp
@@ -68,6 +74,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -82,6 +91,9 @@ import com.bruno.shoppinglist.R
 import com.bruno.shoppinglist.data.ShoppingListCategory
 import com.bruno.shoppinglist.data.ShoppingListItem
 import com.bruno.shoppinglist.viewmodels.ListDetailsViewModel
+import sh.calvin.reorderable.ReorderableCollectionItemScope
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.rememberReorderableLazyListState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -93,6 +105,8 @@ fun ListDetailsScreen(
     val shoppingList by viewModel.getList(listId).collectAsStateWithLifecycle(initialValue = null)
     var showAddCategoryDialog by remember { mutableStateOf(false) }
     var showShareDialog by remember { mutableStateOf(false) }
+
+    val scrollState = rememberScrollState()
 
     if (showAddCategoryDialog) {
         TextDialog(
@@ -145,16 +159,15 @@ fun ListDetailsScreen(
             )
         }
     ) { padding ->
-        LazyColumn(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding),
-            contentPadding = PaddingValues(16.dp),
+                .padding(padding)
+                .verticalScroll(scrollState),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             val categoryEntries = shoppingList?.categories?.entries?.toList() ?: emptyList()
             if (categoryEntries.isEmpty()) {
-                item {
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
@@ -174,20 +187,18 @@ fun ListDetailsScreen(
                             Spacer(modifier = Modifier.height(16.dp))
                         }
                     }
+            }
+            categoryEntries.forEach { categoryEntry ->
+                key(categoryEntry.key) {
+                    CategoryCard(
+                        listId = listId,
+                        categoryId = categoryEntry.key,
+                        category = categoryEntry.value,
+                        viewModel = viewModel
+                    )
                 }
             }
-            items(categoryEntries, key = { it.key }) { categoryEntry ->
-                CategoryCard(
-                    listId = listId,
-                    categoryId = categoryEntry.key,
-                    category = categoryEntry.value,
-                    viewModel = viewModel
-                )
-            }
-
-            item {
-                AddCategoryButton(onClick = { showAddCategoryDialog = true })
-            }
+            AddCategoryButton(onClick = { showAddCategoryDialog = true })
         }
     }
 }
@@ -201,6 +212,30 @@ fun CategoryCard(
 ) {
     var isExpanded by remember { mutableStateOf(false) }
     var showAddItemDialog by remember { mutableStateOf(false) }
+
+    var localItems by remember {
+        mutableStateOf(category.items.toList().sortedBy { it.second.position })
+    }
+
+    LaunchedEffect(category.items) {
+        localItems = category.items.toList().sortedBy { it.second.position }
+    }
+
+    // 1. Define the Column-based reorderable state
+    val lazyListState = rememberLazyListState()
+    val reorderableState = rememberReorderableLazyListState(lazyListState) { from, to ->
+        val fromItem = localItems.find { it.first == from.key }
+        val toItem = localItems.find { it.first == to.key }
+
+        if (fromItem != null && toItem != null) {
+            val fromLocalIndex = localItems.indexOf(fromItem)
+            val toLocalIndex = localItems.indexOf(toItem)
+
+            localItems = localItems.toMutableList().apply {
+                add(toLocalIndex, removeAt(fromLocalIndex))
+            }
+        }
+    }
 
     if (showAddItemDialog) {
         ItemDialog(
@@ -264,30 +299,54 @@ fun CategoryCard(
                 enter = expandVertically() + fadeIn(),
                 exit = shrinkVertically() + fadeOut()
             ) {
-                Column(
+                LazyColumn(
+                    state=lazyListState,
                     modifier = Modifier
+                        .heightIn(max = 2000.dp)
                         .padding(horizontal = 12.dp)
                         .padding(bottom = 12.dp),
                     verticalArrangement = Arrangement.spacedBy(4.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    userScrollEnabled = false
                 ) {
                     if (category.items.isEmpty()) {
-                        Text(text = stringResource(R.string.Category_Empty))
+                        item{Text(text = stringResource(R.string.Category_Empty))}
                     }
-                    category.items.forEach { item ->
-                        key(item.key) {
-                            SwipeToDeleteWrapper(onDelete = {
-                                viewModel.deleteItem(
-                                    listId,
-                                    categoryId,
-                                    item.key
-                                )
-                            }) {
-                                ShoppingItemRow(listId, categoryId, item.key, item.value, viewModel)
+                    items(localItems, key = { it.first }) { (itemId, item) ->
+                        ReorderableItem(reorderableState, key = itemId) { isDragging ->
+                            val elevation by animateDpAsState(if (isDragging) 8.dp else 0.dp)
+
+                            Surface(
+                                shadowElevation = elevation,
+                                tonalElevation = 0.dp, // Removed to keep it invisible
+                                shape = RoundedCornerShape(12.dp),
+                                color = Color.Transparent, // Makes the surface background invisible
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                SwipeToDeleteWrapper(onDelete = {
+                                    viewModel.deleteItem(
+                                        listId,
+                                        categoryId,
+                                        itemId
+                                    )
+                                }) {
+                                    ShoppingItemRow(
+                                        listId = listId,
+                                        categoryId = categoryId,
+                                        itemId = itemId,
+                                        item = item,
+                                        viewModel = viewModel,
+                                        reorderableScope = this, // Pass the scope for the drag handle
+                                        onDragStopped = {
+                                            val finalIndex = localItems.indexOfFirst { it.first == itemId }
+                                            viewModel.moveItem(listId, categoryId, itemId, finalIndex, localItems)
+                                        }
+                                    )
+                                }
                             }
                         }
                     }
-                    AddItemButton { showAddItemDialog = true }
+                    item{AddItemButton { showAddItemDialog = true }}
                 }
             }
         }
@@ -300,10 +359,13 @@ fun ShoppingItemRow(
     categoryId: String,
     itemId: String,
     item: ShoppingListItem,
-    viewModel: ListDetailsViewModel
+    viewModel: ListDetailsViewModel,
+    reorderableScope: ReorderableCollectionItemScope, // Added Scope
+    onDragStopped: () -> Unit // Added Callback
 ) {
     var isChecked by remember { mutableStateOf(item.purchased) }
     val dismissState = rememberSwipeToDismissBoxState()
+    val haptic = LocalHapticFeedback.current
 
     LaunchedEffect(dismissState.currentValue) {
         if (dismissState.currentValue == SwipeToDismissBoxValue.EndToStart) {
@@ -324,7 +386,21 @@ fun ShoppingItemRow(
             .fillMaxWidth().padding(horizontal = 3.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // 2. The Quantity "Square"
+        with(reorderableScope) {
+            Icon(
+                imageVector = Icons.Default.DragHandle,
+                contentDescription = "Reorder",
+                tint = MaterialTheme.colorScheme.outline,
+                modifier = Modifier
+                    .padding(horizontal = 4.dp)
+                    .draggableHandle(
+                        onDragStarted = {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        },
+                        onDragStopped = onDragStopped
+                    )
+            )
+        }
         Surface(
             modifier = Modifier.size(40.dp),
             shape = RoundedCornerShape(8.dp),
@@ -342,7 +418,6 @@ fun ShoppingItemRow(
 
         Spacer(modifier = Modifier.width(12.dp))
 
-        // 3. The Item Name (Taking up available space)
         Text(
             text = item.name,
             modifier = Modifier
@@ -359,7 +434,6 @@ fun ShoppingItemRow(
             color = textColor
         )
 
-        // 4. The Checkmark
         Checkbox(
             checked = isChecked,
             onCheckedChange = {

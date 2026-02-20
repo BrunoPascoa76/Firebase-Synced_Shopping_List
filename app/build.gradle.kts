@@ -76,6 +76,6 @@ dependencies {
     implementation(libs.androidx.camera.lifecycle)
     implementation(libs.androidx.camera.view)
 
-    // ML Kit Barcode Scanning
+    implementation(libs.reorderable)
     implementation(libs.barcode.scanning)
 }
